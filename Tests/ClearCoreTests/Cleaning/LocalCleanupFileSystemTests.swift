@@ -6,8 +6,10 @@ import XCTest
 final class LocalCleanupFileSystemTests: XCTestCase {
     func testScanRejectsSymbolicLinkRuleRoot() async throws {
         let fileManager = FileManager.default
-        let fixtureRoot = fileManager.temporaryDirectory
-            .resolvingSymlinksInPath()
+        let fixtureRoot = URL(
+            fileURLWithPath: "/private/tmp",
+            isDirectory: true
+        )
             .appendingPathComponent(
                 "clear-symlink-root-\(UUID().uuidString)",
                 isDirectory: true
@@ -55,8 +57,10 @@ final class LocalCleanupFileSystemTests: XCTestCase {
 
     func testAncestorSymbolicLinkCannotRedirectScanOrCleanup() async throws {
         let fileManager = FileManager.default
-        let fixtureRoot = fileManager.temporaryDirectory
-            .resolvingSymlinksInPath()
+        let fixtureRoot = URL(
+            fileURLWithPath: "/private/tmp",
+            isDirectory: true
+        )
             .appendingPathComponent(
                 "clear-ancestor-link-\(UUID().uuidString)",
                 isDirectory: true
@@ -177,8 +181,10 @@ final class LocalCleanupFileSystemTests: XCTestCase {
 
     func testSecureMoveUsesTrustedRootAndMovesRegularFile() async throws {
         let fileManager = FileManager.default
-        let fixtureRoot = fileManager.temporaryDirectory
-            .resolvingSymlinksInPath()
+        let fixtureRoot = URL(
+            fileURLWithPath: "/private/tmp",
+            isDirectory: true
+        )
             .appendingPathComponent(
                 "clear-secure-trash-\(UUID().uuidString)",
                 isDirectory: true
@@ -247,8 +253,10 @@ final class LocalCleanupFileSystemTests: XCTestCase {
 
     func testRenamedTrashDirectoryRollsSourceBack() async throws {
         let fileManager = FileManager.default
-        let fixtureRoot = fileManager.temporaryDirectory
-            .resolvingSymlinksInPath()
+        let fixtureRoot = URL(
+            fileURLWithPath: "/private/tmp",
+            isDirectory: true
+        )
             .appendingPathComponent(
                 "clear-trash-swap-\(UUID().uuidString)",
                 isDirectory: true
@@ -329,8 +337,10 @@ final class LocalCleanupFileSystemTests: XCTestCase {
 
     func testRenamedSourceParentIsRejectedBeforeMove() async throws {
         let fileManager = FileManager.default
-        let fixtureRoot = fileManager.temporaryDirectory
-            .resolvingSymlinksInPath()
+        let fixtureRoot = URL(
+            fileURLWithPath: "/private/tmp",
+            isDirectory: true
+        )
             .appendingPathComponent(
                 "clear-parent-swap-\(UUID().uuidString)",
                 isDirectory: true
