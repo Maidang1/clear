@@ -1,7 +1,6 @@
 import AppKit
 import Darwin
 import Foundation
-import LibProc
 
 public struct RunningApplicationSnapshot: Identifiable, Hashable, Sendable {
     public let id: String
