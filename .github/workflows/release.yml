@@ -1,0 +1,40 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v[0-9]+.[0-9]+.[0-9]+"
+
+permissions:
+  contents: write
+  id-token: write
+  attestations: write
+
+jobs:
+  release:
+    runs-on: macos-15-intel
+    environment: release
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build DMG
+        env:
+          CLEAR_VERSION: ${{ github.ref_name }}
+          CLEAR_BUILD_NUMBER: ${{ github.run_number }}
+        run: |
+          export CLEAR_VERSION="${CLEAR_VERSION#v}"
+          bash scripts/package_dmg.sh
+      - name: Attest build provenance
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: "dist/*.dmg"
+      - name: Create draft release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${GITHUB_REF_NAME}" \
+            dist/*.dmg \
+            dist/*.sha256 \
+            --draft \
+            --verify-tag \
+            --generate-notes \
+            --title "Clear ${GITHUB_REF_NAME}"
