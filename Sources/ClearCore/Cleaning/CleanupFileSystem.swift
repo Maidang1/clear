@@ -496,7 +496,7 @@ struct LocalCleanupFileSystem: CleanupFileSystem {
                 let errorCode = errno
                 close(descriptor)
                 throw SecureTrashMoveError.posix(
-                    operation: operation,
+                    operation: "\(operation) component \(component)",
                     code: errorCode
                 )
             }
