@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - "codex/**"
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Test (${{ matrix.arch }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: macos-15
+            arch: arm64
+          - runner: macos-15-intel
+            arch: x86_64
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Show toolchain
+        run: |
+          uname -m
+          swift --version
+          xcodebuild -version
+      - name: Test
+        run: swift test --parallel
+
+  universal:
+    name: Universal app
+    runs-on: macos-15-intel
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and verify
+        run: bash scripts/build_universal_app.sh
+      - name: Inspect binary
+        run: |
+          lipo -archs dist/Clear.app/Contents/MacOS/Clear
+          codesign --verify --strict --deep --verbose=2 dist/Clear.app
