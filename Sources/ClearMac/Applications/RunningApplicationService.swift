@@ -60,7 +60,9 @@ public final class RunningApplicationService {
         let currentPID = ProcessInfo.processInfo.processIdentifier
         var nextApplications: [String: NSRunningApplication] = [:]
 
-        let snapshots = NSWorkspace.shared.runningApplications.compactMap { application in
+        let snapshots: [RunningApplicationSnapshot] =
+            NSWorkspace.shared.runningApplications.compactMap {
+                application -> RunningApplicationSnapshot? in
             guard
                 !application.isTerminated,
                 application.activationPolicy == .regular,
