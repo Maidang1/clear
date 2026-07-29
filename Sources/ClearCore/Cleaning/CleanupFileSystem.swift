@@ -517,15 +517,14 @@ struct LocalCleanupFileSystem: CleanupFileSystem {
         while path.count > 1, path.hasSuffix("/") {
             path.removeLast()
         }
-        let pathComponents = URL(
-            fileURLWithPath: path,
-            isDirectory: true
-        ).pathComponents
-        guard pathComponents.first == "/" else {
+        guard path.hasPrefix("/") else {
             throw SecureTrashMoveError.invalidPath
         }
 
-        let relativeComponents = Array(pathComponents.dropFirst())
+        let relativeComponents = path.split(
+            separator: "/",
+            omittingEmptySubsequences: true
+        ).map(String.init)
         guard relativeComponents.allSatisfy({
             !$0.isEmpty
                 && $0 != "."
