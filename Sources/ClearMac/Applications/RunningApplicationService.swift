@@ -7,7 +7,6 @@ public struct RunningApplicationSnapshot: Identifiable, Hashable, Sendable {
     public let processIdentifier: pid_t
     public let bundleIdentifier: String?
     public let name: String
-    public let footprintBytes: UInt64?
     public let isActive: Bool
     public let isHidden: Bool
     public let isProtected: Bool
@@ -17,7 +16,6 @@ public struct RunningApplicationSnapshot: Identifiable, Hashable, Sendable {
         processIdentifier: pid_t,
         bundleIdentifier: String?,
         name: String,
-        footprintBytes: UInt64?,
         isActive: Bool,
         isHidden: Bool,
         isProtected: Bool
@@ -26,7 +24,6 @@ public struct RunningApplicationSnapshot: Identifiable, Hashable, Sendable {
         self.processIdentifier = processIdentifier
         self.bundleIdentifier = bundleIdentifier
         self.name = name
-        self.footprintBytes = footprintBytes
         self.isActive = isActive
         self.isHidden = isHidden
         self.isProtected = isProtected
@@ -80,7 +77,6 @@ public final class RunningApplicationService {
                 processIdentifier: application.processIdentifier,
                 bundleIdentifier: bundleIdentifier,
                 name: application.localizedName ?? bundleIdentifier ?? "PID \(application.processIdentifier)",
-                footprintBytes: Self.physicalFootprint(for: application.processIdentifier),
                 isActive: application.isActive,
                 isHidden: application.isHidden,
                 isProtected: bundleIdentifier.map(Self.protectedBundleIdentifiers.contains) ?? true
@@ -90,20 +86,11 @@ public final class RunningApplicationService {
         applicationsBySnapshotID = nextApplications
 
         return snapshots.sorted {
-            switch ($0.footprintBytes, $1.footprintBytes) {
-            case let (.some(left), .some(right)):
-                if left == right {
-                    return $0.name.localizedCaseInsensitiveCompare($1.name)
-                        == .orderedAscending
-                }
-                return left > right
-            case (.some, .none):
-                return true
-            case (.none, .some):
-                return false
-            case (.none, .none):
-                return $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending
+            if $0.isActive != $1.isActive {
+                return $0.isActive
             }
+            return $0.name.localizedCaseInsensitiveCompare($1.name)
+                == .orderedAscending
         }
     }
 
@@ -148,21 +135,6 @@ public final class RunningApplicationService {
         return application.terminate() ? .requested : .refused
     }
 
-    public func forceTermination(of snapshotID: String) -> ApplicationTerminationResult {
-        guard let application = applicationsBySnapshotID[snapshotID] else {
-            return .noLongerRunning
-        }
-        guard !isProtected(application) else {
-            return .protectedApplication
-        }
-        guard !application.isTerminated else {
-            applicationsBySnapshotID.removeValue(forKey: snapshotID)
-            return .noLongerRunning
-        }
-
-        return application.forceTerminate() ? .requested : .refused
-    }
-
     private func snapshotID(for application: NSRunningApplication) -> String {
         let launchTime = application.launchDate?.timeIntervalSince1970 ?? 0
         return "\(application.processIdentifier):\(launchTime)"
@@ -173,21 +145,5 @@ public final class RunningApplicationService {
             return true
         }
         return Self.protectedBundleIdentifiers.contains(bundleIdentifier)
-    }
-
-    private static func physicalFootprint(for pid: pid_t) -> UInt64? {
-        var usage = rusage_info_v4()
-        let result = withUnsafeMutablePointer(to: &usage) { pointer in
-            pointer.withMemoryRebound(
-                to: Optional<rusage_info_t>.self,
-                capacity: 1
-            ) { reboundPointer in
-                proc_pid_rusage(pid, RUSAGE_INFO_V4, reboundPointer)
-            }
-        }
-        guard result == 0 else {
-            return nil
-        }
-        return usage.ri_phys_footprint
     }
 }

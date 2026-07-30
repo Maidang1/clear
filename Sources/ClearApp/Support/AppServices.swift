@@ -38,8 +38,7 @@ struct ClearMacMemorySnapshotProvider: MemorySnapshotProviding {
         let reclaimable = clampedSum(
             [
                 sample.freeMemoryBytes ?? 0,
-                sample.inactiveMemoryBytes ?? 0,
-                sample.speculativeMemoryBytes ?? 0
+                sample.inactiveMemoryBytes ?? 0
             ],
             upperBound: total
         )

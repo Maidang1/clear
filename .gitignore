@@ -4,6 +4,7 @@
 DerivedData/
 build/
 dist/
+node_modules/
 *.dmg
 *.xcarchive
 xcuserdata/
