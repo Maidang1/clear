@@ -145,7 +145,6 @@ enum MemoryPressureEstimator {
             [
                 freeMemoryBytes,
                 inactiveMemoryBytes,
-                speculativeMemoryBytes,
             ],
             upperBound: physicalMemoryBytes
         )

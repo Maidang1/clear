@@ -8,7 +8,7 @@ final class AppSettingsStore: ObservableObject {
         static let includesOldLogs = "clear.scan.includesOldLogs"
         static let cacheMinimumAgeDays = "clear.scan.cacheMinimumAgeDays"
         static let logMinimumAgeDays = "clear.scan.logMinimumAgeDays"
-        static let sharesAnonymousDiagnostics =
+        static let legacySharesAnonymousDiagnostics =
             "clear.privacy.sharesAnonymousDiagnostics"
     }
 
@@ -34,17 +34,11 @@ final class AppSettingsStore: ObservableObject {
         }
     }
 
-    @Published var sharesAnonymousDiagnostics: Bool {
-        didSet {
-            defaults.set(
-                sharesAnonymousDiagnostics,
-                forKey: Key.sharesAnonymousDiagnostics
-            )
-        }
-    }
-
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
+        defaults.removeObject(
+            forKey: Key.legacySharesAnonymousDiagnostics
+        )
 
         includesUserCaches = defaults.object(
             forKey: Key.includesUserCaches
@@ -63,9 +57,6 @@ final class AppSettingsStore: ObservableObject {
         )
         logMinimumAgeDays = storedLogAge == 0 ? 30 : storedLogAge
 
-        sharesAnonymousDiagnostics = defaults.bool(
-            forKey: Key.sharesAnonymousDiagnostics
-        )
     }
 
     var scanOptions: CleanupScanOptions {
@@ -82,7 +73,6 @@ final class AppSettingsStore: ObservableObject {
         includesOldLogs = true
         cacheMinimumAgeDays = 7
         logMinimumAgeDays = 30
-        sharesAnonymousDiagnostics = false
     }
 }
 

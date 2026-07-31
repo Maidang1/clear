@@ -26,7 +26,7 @@ struct MemoryCenterView: View {
             } else {
                 EmptyStateView(
                     title: "尚未采样",
-                    message: "刷新后可查看估算压力、物理内存、已用内存、压缩内存和交换空间。",
+                    message: "刷新后可查看估算压力、物理内存、已用内存、压缩器占用和交换空间。",
                     systemImage: "memorychip",
                     actionTitle: "开始采样"
                 ) {
@@ -116,9 +116,9 @@ struct MemoryCenterView: View {
                         systemImage: "chart.pie.fill"
                     )
                     MemoryMetricCard(
-                        title: "压缩内存",
+                        title: "压缩器占用",
                         value: snapshot.compressedBytes.clearFormattedBytes,
-                        detail: "macOS 为提高利用率压缩的内存",
+                        detail: "压缩器保存压缩数据使用的物理内存",
                         systemImage: "arrow.down.right.and.arrow.up.left"
                     )
                     MemoryMetricCard(
@@ -173,10 +173,10 @@ struct MemoryCenterView: View {
         if !viewModel.applications.isEmpty {
             VStack(alignment: .leading, spacing: 10) {
                 HStack {
-                    Text("高占用应用")
+                    Text("运行中的应用")
                         .font(.headline)
                     Spacer()
-                    Text("按物理占用估算排序")
+                    Text("Clear 不读取其他进程的内存占用")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
@@ -194,15 +194,12 @@ struct MemoryCenterView: View {
                             Text(application.name)
                                 .font(.callout.weight(.medium))
                             HStack(spacing: 8) {
-                                Text(
-                                    application.footprintBytes?
-                                        .clearFormattedBytes
-                                        ?? "占用不可用"
-                                )
                                 if application.isActive {
                                     Text("正在使用")
                                 } else if application.isHidden {
                                     Text("已隐藏")
+                                } else {
+                                    Text("正在运行")
                                 }
                             }
                             .font(.caption)

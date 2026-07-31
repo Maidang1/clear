@@ -58,13 +58,7 @@ struct SettingsView: View {
             }
 
             Section("隐私与诊断") {
-                Toggle(
-                    "分享匿名诊断数据",
-                    isOn: $settingsStore.sharesAnonymousDiagnostics
-                )
-                .accessibilityHint("此开关当前只保存偏好，不会在未接入服务时上传数据")
-
-                Text("当前版本不会上传路径、文件名或文件内容。诊断上传服务接入前，此设置只保存在本机。")
+                Text("Clear 的分析、诊断和处理历史只保存在本机，不会上传遥测或使用数据。主动检查更新时才会连接 GitHub。")
                     .font(.caption)
                     .foregroundStyle(.secondary)
 

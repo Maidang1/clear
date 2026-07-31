@@ -259,6 +259,20 @@ final class MemoryPressureEstimatorTests: XCTestCase {
         )
     }
 
+    func testSpeculativePagesAreNotAddedToFreePagesAgain() {
+        XCTAssertEqual(
+            MemoryPressureEstimator.estimate(
+                physicalMemoryBytes: 1_000,
+                freeMemoryBytes: 50,
+                inactiveMemoryBytes: 0,
+                speculativeMemoryBytes: 100,
+                compressedMemoryBytes: 0,
+                swapUsedBytes: 0
+            ),
+            .critical
+        )
+    }
+
     private func estimate(
         reclaimableBytes: UInt64,
         compressedBytes: UInt64 = 0,
